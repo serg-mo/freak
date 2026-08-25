@@ -6,12 +6,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default {
-  mode: 'development',
-
-  entry: './src/main.jsx',
+  entry: './src/index.js',
 
   output: {
-    path: path.resolve(__dirname, 'dist'),
+    path: path.resolve(__dirname, 'docs'),
+    publicPath: 'https://serg-mo.github.io/freak/',
     filename: 'bundle.js',
     clean: true,
   },
@@ -21,7 +20,12 @@ export default {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: 'babel-loader',
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/preset-env', '@babel/preset-react'],
+          },
+        },
       },
       {
         test: /\.css$/,
@@ -34,19 +38,11 @@ export default {
     extensions: ['.js', '.jsx'],
   },
 
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: './index.html',
-    }),
-  ],
+  plugins: [new HtmlWebpackPlugin({ template: './public/index.html' })],
 
   devServer: {
-    static: {
-      directory: path.join(__dirname, 'public'),
-    },
-    port: 5173,
+    static: './public',
     open: true,
-  },
-
-  devtool: 'source-map',
+    hot: true,
+  }
 };
