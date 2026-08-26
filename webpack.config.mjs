@@ -10,7 +10,7 @@ export default {
 
   output: {
     path: path.resolve(__dirname, 'docs'),
-    publicPath: 'https://serg-mo.github.io/freak/',
+    // publicPath: '/', // 'https://serg-mo.github.io/freak/',
     filename: 'bundle.js',
     clean: true,
   },
