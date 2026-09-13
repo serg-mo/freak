@@ -1,19 +1,9 @@
 import { useEffect, useRef } from 'react';
 import Chart from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { formatTime, formatTimeFromSeconds } from './utils.js';
 
 Chart.register(ChartDataLabels);
-
-export function formatTime(totalSeconds) {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  return [hours, minutes, seconds]
-    .filter((v) => v)
-    .map((n) => String(n).padStart(2, '0'))
-    .join(':');
-}
 
 export default function RecipeChart({ recipes }) {
   const canvasRef = useRef(null);
@@ -67,7 +57,7 @@ export default function RecipeChart({ recipes }) {
 
                 return [
                   `Temp: ${p.temp}°F`,
-                  `Time: ${formatTime(p.totalSeconds)}`,
+                  `Time: ${formatTime(p)}`,
                   `Intensity: ${p.intensity}`,
                   `Start: ${p.timerStart}`,
                   `End: ${p.timerEnd}`,
@@ -84,7 +74,7 @@ export default function RecipeChart({ recipes }) {
             },
             ticks: {
               color: '#71717a',
-              callback: (value) => formatTime(value),
+              callback: (value) => formatTimeFromSeconds(value),
             },
           },
 

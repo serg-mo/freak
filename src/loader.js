@@ -5,7 +5,7 @@ const RECORDS_PER_PAGE = 7;
 const decoder = new TextDecoder('ascii');
 
 const INTENSITY = ['Slow', 'Medium', 'Fast', 'Reserved'];
-const TIMER_START = ['Immediate', 'At Temperature', 'Prompt', 'Reserved'];
+const TIMER_START = ['Immediate', 'At Temp', 'Prompt', 'Reserved'];
 const TIMER_END = ['Continue', 'Stop', 'Keep Warm', 'Repeat'];
 
 async function loadFile(url) {

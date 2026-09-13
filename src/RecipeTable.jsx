@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
+import { formatTime } from './utils.js';
 
 export default function RecipeTable({ recipes }) {
   const [sort, setSort] = useState({ key: 'name', desc: false }); // asc by default
@@ -27,24 +28,15 @@ export default function RecipeTable({ recipes }) {
   const toggleSort = (key) =>
     setSort((s) => ({ key, desc: s.key === key ? !s.desc : false }));
 
-  const time = (r) =>
-    [
-      r.hours && String(r.hours).padStart(2, '0'),
-      String(r.minutes).padStart(2, '0'),
-      String(r.seconds).padStart(2, '0'),
-    ]
-      .filter(Boolean)
-      .join(':');
-
   return (
-    <table className="mx-auto text-sm text-nowrap">
-      <thead className="border-b border-zinc-800 text-left text-xs uppercase text-zinc-500">
+    <table className="w-full text-xs sm:text-sm text-nowrap">
+      <thead className="border-b border-zinc-800 text-left uppercase text-zinc-500">
         <tr>
-          {columns.map(([key, label]) => (
+          {columns.map(([key, label], index) => (
             <th
               key={key}
               onClick={() => toggleSort(key)}
-              className="cursor-pointer p-2 hover:text-zinc-200 select-none"
+              className={`cursor-pointer p-2 hover:text-zinc-200 select-none ${index > 2 ? 'hidden sm:table-cell' : ''}`}
             >
               <span className="inline-flex items-center">
                 {label}
@@ -68,13 +60,13 @@ export default function RecipeTable({ recipes }) {
             key={`${recipe.name}-${index}`}
             className="group transition-colors hover:bg-zinc-800/40"
           >
-            <td className="p-2 w-content">{recipe.name}</td>
-
+            <td className="p-2 w-auto">{recipe.name}</td>
             <td className="p-2">{recipe.temp}F</td>
-            <td className="p-2">{time(recipe)}</td>
-            <td className="p-2">{recipe.timerStart}</td>
-            <td className="p-2">{recipe.timerEnd}</td>
-            <td className="p-2">{recipe.intensity}</td>
+            <td className="p-2">{formatTime(recipe)}</td>
+
+            <td className="p-2 hidden sm:table-cell">{recipe.timerStart}</td>
+            <td className="p-2 hidden sm:table-cell">{recipe.timerEnd}</td>
+            <td className="p-2 hidden sm:table-cell">{recipe.intensity}</td>
           </tr>
         ))}
       </tbody>
