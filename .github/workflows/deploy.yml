@@ -32,6 +32,9 @@ jobs:
         run: npm install && npm run build
 
       - run: echo "$(git rev-parse --short=5 HEAD)" > ./docs/version.txt
+      
+      # must match src/App.jsx::FILE_URL
+      - run: cp public/CMC850.FA1 ./docs/CMC850.FA1
 
       # Repo Settings > Pages > Source should be "GitHub Actions" 
       - uses: actions/configure-pages@v5
