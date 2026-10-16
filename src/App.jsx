@@ -5,7 +5,15 @@ import DragAndDrop from './DragAndDrop';
 
 export default function App() {
   const [recipes, setRecipes] = useState([]);
-  const [names, setNames] = useState([]);
+
+  // NOTE: selected recipe names live in the url query string
+  const [names, setNames] = useState(
+    () =>
+      new URLSearchParams(window.location.search)
+        .get('names')
+        ?.split(',')
+        .filter(Boolean) ?? [],
+  );
 
   const toggleName = (name) => {
     setNames((prev) =>
@@ -14,20 +22,27 @@ export default function App() {
   };
 
   useEffect(() => {
-    const FILE_URL = 'CMC850.FA1'; // must be relative
-    const load = async () =>
-      await loadFile(FILE_URL)
-        .then(parseFile)
-        .then((recipes) =>
-          setRecipes(recipes.filter((recipe) => recipe.totalSeconds < 15 * 60)),
-        )
-        .catch(console.error);
-    load();
+    const params = new URLSearchParams(window.location.search);
+    params.set('names', names.join(',')); // overwrite
+    const url = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, '', url);
+  }, [names]);
+
+  useEffect(() => {
+    const FILE_URL = 'CMC850.FA1';
+
+    loadFile(FILE_URL)
+      .then(parseFile)
+      .then((recipes) =>
+        setRecipes(recipes.filter((recipe) => recipe.totalSeconds < 15 * 60)),
+      )
+      .catch(console.error);
   }, []);
 
   const handleTxts = (txts) => {
     const bytes = Uint8Array.from(txts[0], (c) => c.charCodeAt(0));
     const recipes = parseFile(new DataView(bytes.buffer));
+
     setRecipes(recipes.filter((recipe) => recipe.totalSeconds < 15 * 60));
   };
 

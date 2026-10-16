@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { formatTime } from './utils.js';
 
-export default function RecipeTable({ recipes, names, onClick }) {
+export default function RecipeTable({ recipes, names, toggleName }) {
   const [sort, setSort] = useState({ key: 'name', desc: false }); // asc by default
 
   const columns = [
@@ -58,8 +58,8 @@ export default function RecipeTable({ recipes, names, onClick }) {
         {sortedRecipes.map((recipe, index) => (
           <tr
             key={`${recipe.name}-${index}`}
-            onClick={() => onClick(recipe.name)}
-            className={`group transition-colors hover:bg-zinc-800/40 ${names.includes(recipe.name) ? 'bg-zinc-800/40' : ''}`}
+            onClick={() => toggleName(recipe.name)}
+            className={`group transition-colors hover:bg-zinc-800/40 ${names.includes(recipe.name) ? 'bg-zinc-500/40' : ''} cursor-pointer`}
           >
             <td className="p-2 w-auto">{recipe.name}</td>
             <td className="p-2">{recipe.temp}F</td>

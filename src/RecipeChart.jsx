@@ -5,9 +5,34 @@ import { formatTime, formatTimeFromSeconds } from './utils.js';
 
 Chart.register(ChartDataLabels);
 
-export default function RecipeChart({ recipes, names, onClick }) {
+const POINT_RADIUS = 3;
+
+const DEFAULT_COLOR = '#fb923c';
+
+export default function RecipeChart({ recipes, names, toggleName }) {
   const canvasRef = useRef(null);
   const chartRef = useRef(null);
+  const isOn = (name) => names.includes(name);
+
+  const firstWord = (name) => name.trim().split(/\s+/)[0]?.toLowerCase() ?? '';
+
+  const counts = recipes.reduce((acc, recipe) => {
+    const word = firstWord(recipe.name);
+    acc[word] = (acc[word] || 0) + 1;
+    return acc;
+  }, {});
+
+  const colorForRecipe = (name) => {
+    const word = firstWord(name);
+    if (counts[word] <= 1) return DEFAULT_COLOR;
+
+    let hash = 0;
+    for (const char of word) {
+      hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+    }
+
+    return `hsl(${hash % 360}, 70%, 60%)`;
+  };
 
   useEffect(() => {
     const chart = new Chart(canvasRef.current, {
@@ -20,10 +45,10 @@ export default function RecipeChart({ recipes, names, onClick }) {
               xAxisKey: 'totalSeconds', // must match scales.x.ticks.callback
               yAxisKey: 'temp',
             },
-            pointRadius: 3,
-            pointHoverRadius: 6,
-            backgroundColor: '#fb923c',
-            borderColor: '#fb923c',
+            pointRadius: ({ raw }) =>
+              isOn(raw.name) ? POINT_RADIUS * 2 : POINT_RADIUS,
+            pointHoverRadius: POINT_RADIUS * 2,
+            backgroundColor: ({ raw }) => colorForRecipe(raw.name),
           },
         ],
       },
@@ -31,7 +56,7 @@ export default function RecipeChart({ recipes, names, onClick }) {
         responsive: true,
         animation: false,
         onClick: (_, elements) => {
-          if (elements.length) onClick(recipes[elements[0].index].name);
+          if (elements.length) toggleName(recipes[elements[0].index].name);
         },
         plugins: {
           legend: {
@@ -81,18 +106,14 @@ export default function RecipeChart({ recipes, names, onClick }) {
       chart.destroy();
       chartRef.current = null;
     };
-  }, [recipes, onClick]);
+  }, [recipes, toggleName]);
 
   useEffect(() => {
     const chart = chartRef.current;
     if (!chart) return;
 
-    chart.data.datasets[0].pointRadius = (c) =>
-      names.includes(c.raw.name) ? 6 : 3;
-    chart.data.datasets[0].backgroundColor = (c) =>
-      names.includes(c.raw.name) ? '#fef3c7' : '#fb923c';
-    chart.data.datasets[0].borderColor = (c) =>
-      names.includes(c.raw.name) ? '#fef3c7' : '#fb923c';
+    chart.data.datasets[0].pointRadius = ({ raw }) =>
+      isOn(raw.name) ? POINT_RADIUS * 2 : POINT_RADIUS;
 
     chart.update('none');
   }, [names]);
