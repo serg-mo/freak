@@ -25,10 +25,13 @@ export default {
           options: {
             presets: [
               '@babel/preset-env',
-              ['@babel/preset-react', {
-                runtime: 'automatic',
-                development: false,
-              }],
+              [
+                '@babel/preset-react',
+                {
+                  runtime: 'automatic',
+                  development: false,
+                },
+              ],
             ],
           },
         },
@@ -50,5 +53,5 @@ export default {
     static: './public',
     open: true,
     hot: true,
-  }
+  },
 };
