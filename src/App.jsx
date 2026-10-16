@@ -5,6 +5,13 @@ import DragAndDrop from './DragAndDrop';
 
 export default function App() {
   const [recipes, setRecipes] = useState([]);
+  const [names, setNames] = useState([]);
+
+  const toggleName = (name) => {
+    setNames((prev) =>
+      prev.includes(name) ? prev.filter((i) => i !== name) : [...prev, name],
+    );
+  };
 
   useEffect(() => {
     const FILE_URL = 'CMC850.FA1'; // must be relative
@@ -33,5 +40,5 @@ export default function App() {
     );
   }
 
-  return <Recipes recipes={recipes} />;
+  return <Recipes recipes={recipes} names={names} toggleName={toggleName} />;
 }

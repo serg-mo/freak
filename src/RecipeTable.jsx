@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
 import { formatTime } from './utils.js';
 
-export default function RecipeTable({ recipes }) {
+export default function RecipeTable({ recipes, names, onClick }) {
   const [sort, setSort] = useState({ key: 'name', desc: false }); // asc by default
 
   const columns = [
@@ -29,7 +29,7 @@ export default function RecipeTable({ recipes }) {
     setSort((s) => ({ key, desc: s.key === key ? !s.desc : false }));
 
   return (
-    <table className="w-full text-xs sm:text-sm text-nowrap">
+    <table className="max-w-min m-auto text-xs sm:text-sm text-nowrap">
       <thead className="border-b border-zinc-800 text-left uppercase text-zinc-500">
         <tr>
           {columns.map(([key, label], index) => (
@@ -58,7 +58,8 @@ export default function RecipeTable({ recipes }) {
         {sortedRecipes.map((recipe, index) => (
           <tr
             key={`${recipe.name}-${index}`}
-            className="group transition-colors hover:bg-zinc-800/40"
+            onClick={() => onClick(recipe.name)}
+            className={`group transition-colors hover:bg-zinc-800/40 ${names.includes(recipe.name) ? 'bg-zinc-800/40' : ''}`}
           >
             <td className="p-2 w-auto">{recipe.name}</td>
             <td className="p-2">{recipe.temp}F</td>

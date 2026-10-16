@@ -5,12 +5,11 @@ import { formatTime, formatTimeFromSeconds } from './utils.js';
 
 Chart.register(ChartDataLabels);
 
-export default function RecipeChart({ recipes }) {
+export default function RecipeChart({ recipes, names, onClick }) {
   const canvasRef = useRef(null);
+  const chartRef = useRef(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
-
     const chart = new Chart(canvasRef.current, {
       type: 'scatter',
       data: {
@@ -18,7 +17,7 @@ export default function RecipeChart({ recipes }) {
           {
             data: recipes,
             parsing: {
-              xAxisKey: 'totalSeconds',
+              xAxisKey: 'totalSeconds', // must match scales.x.ticks.callback
               yAxisKey: 'temp',
             },
             pointRadius: 3,
@@ -28,10 +27,12 @@ export default function RecipeChart({ recipes }) {
           },
         ],
       },
-
       options: {
         responsive: true,
-
+        animation: false,
+        onClick: (_, elements) => {
+          if (elements.length) onClick(recipes[elements[0].index].name);
+        },
         plugins: {
           legend: {
             display: false,
@@ -51,48 +52,54 @@ export default function RecipeChart({ recipes }) {
 
             callbacks: {
               title: (items) => items[0].raw.name,
-
-              label: (context) => {
-                const p = context.raw;
-
-                return [
-                  `Temp: ${p.temp}°F`,
-                  `Time: ${formatTime(p)}`,
-                  `Intensity: ${p.intensity}`,
-                  `Start: ${p.timerStart}`,
-                  `End: ${p.timerEnd}`,
-                ];
-              },
+              label: ({ raw }) => [
+                `Temp: ${raw.temp}°F`,
+                `Time: ${formatTime({ hours: raw.hours, minutes: raw.minutes, seconds: raw.seconds })}`,
+                `Intensity: ${raw.intensity}`,
+                `Start: ${raw.timerStart}`,
+                `End: ${raw.timerEnd}`,
+              ],
             },
           },
         },
-
         scales: {
           x: {
-            grid: {
-              color: '#27272a',
-            },
-            ticks: {
-              color: '#71717a',
-              callback: (value) => formatTimeFromSeconds(value),
-            },
+            grid: { color: '#27272a' },
+            ticks: { color: '#71717a', callback: formatTimeFromSeconds },
           },
 
           y: {
-            grid: {
-              color: '#27272a',
-            },
-            ticks: {
-              color: '#71717a',
-              callback: (value) => `${value}F`,
-            },
+            grid: { color: '#27272a' },
+            ticks: { color: '#71717a', callback: (v) => `${v}F` },
           },
         },
       },
     });
 
-    return () => chart.destroy();
-  }, [recipes]);
+    chartRef.current = chart;
+    return () => {
+      chart.destroy();
+      chartRef.current = null;
+    };
+  }, [recipes, onClick]);
 
-  return <canvas ref={canvasRef} className="w-full p-2" />;
+  useEffect(() => {
+    const chart = chartRef.current;
+    if (!chart) return;
+
+    chart.data.datasets[0].pointRadius = (c) =>
+      names.includes(c.raw.name) ? 6 : 3;
+    chart.data.datasets[0].backgroundColor = (c) =>
+      names.includes(c.raw.name) ? '#fef3c7' : '#fb923c';
+    chart.data.datasets[0].borderColor = (c) =>
+      names.includes(c.raw.name) ? '#fef3c7' : '#fb923c';
+
+    chart.update('none');
+  }, [names]);
+
+  return (
+    <div className="h-96 p-2 flex justify-center">
+      <canvas ref={canvasRef} />
+    </div>
+  );
 }
