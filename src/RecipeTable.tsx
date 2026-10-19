@@ -1,11 +1,27 @@
 import { useState } from 'react';
 import { IconChevronDown, IconChevronUp } from '@tabler/icons-react';
-import { formatTime } from './utils.js';
+import { formatTime } from './utils';
+import type { Recipe } from './types';
 
-export default function RecipeTable({ recipes, names, toggleName }) {
-  const [sort, setSort] = useState({ key: 'name', desc: false }); // asc by default
+type RecipeTableProps = {
+  recipes: Recipe[];
+  names: string[];
+  toggleName: (name: string) => void;
+};
 
-  const columns = [
+type SortKey = keyof Recipe;
+
+export default function RecipeTable({
+  recipes,
+  names,
+  toggleName,
+}: RecipeTableProps) {
+  const [sort, setSort] = useState<{ key: SortKey; desc: boolean }>({
+    key: 'name',
+    desc: false,
+  });
+
+  const columns: [SortKey, string][] = [
     ['name', 'Name'],
     ['temp', 'Temp'],
     ['totalSeconds', 'Time'],
@@ -25,7 +41,7 @@ export default function RecipeTable({ recipes, names, toggleName }) {
     return sort.desc ? -result : result;
   });
 
-  const toggleSort = (key) =>
+  const toggleSort = (key: SortKey) =>
     setSort((s) => ({ key, desc: s.key === key ? !s.desc : false }));
 
   return (

@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import RecipeChart from './RecipeChart';
+import RecipeTable from './RecipeTable';
+import type { Recipe } from './types';
 
-import RecipeChart from './RecipeChart.jsx';
-import ReceipeTable from './RecipeTable.jsx';
+type RecipesProps = {
+  recipes: Recipe[];
+  names: string[];
+  toggleName: (name: string) => void;
+};
 
-export default function Recipes({ recipes, names, toggleName }) {
+export default function Recipes({ recipes, names, toggleName }: RecipesProps) {
   return (
     <div className="w-full bg-zinc-950 text-zinc-100 flex flex-col gap-4 p-3 sm:p-6">
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 hidden sm:block">
@@ -11,7 +16,7 @@ export default function Recipes({ recipes, names, toggleName }) {
       </div>
 
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80">
-        <ReceipeTable recipes={recipes} toggleName={toggleName} names={names} />
+        <RecipeTable recipes={recipes} toggleName={toggleName} names={names} />
       </div>
     </div>
   );

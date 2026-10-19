@@ -1,14 +1,16 @@
+import type { Recipe } from './types';
+
 const PAGE_SIZE = 256;
 const RECORD_SIZE = 36;
 const RECORDS_PER_PAGE = 7;
 
 const decoder = new TextDecoder('ascii');
 
-const INTENSITY = ['Slow', 'Medium', 'Fast', 'Reserved'];
-const TIMER_START = ['Immediate', 'At Temp', 'Prompt', 'Reserved'];
-const TIMER_END = ['Continue', 'Stop', 'Keep Warm', 'Repeat'];
+const INTENSITY = ['Slow', 'Medium', 'Fast', 'Reserved'] as const;
+const TIMER_START = ['Immediate', 'At Temp', 'Prompt', 'Reserved'] as const;
+const TIMER_END = ['Continue', 'Stop', 'Keep Warm', 'Repeat'] as const;
 
-export async function loadFile(url) {
+export async function loadFile(url: string): Promise<DataView> {
   const response = await fetch(url);
 
   if (!response.ok) {
@@ -18,7 +20,7 @@ export async function loadFile(url) {
   return new DataView(await response.arrayBuffer());
 }
 
-function parseName(view, offset) {
+function parseName(view: DataView, offset: number): string {
   const bytes = new Uint8Array(view.buffer, view.byteOffset + offset, 30);
 
   let end = 0;
@@ -26,7 +28,7 @@ function parseName(view, offset) {
   while (end < bytes.length) {
     const b = bytes[end];
 
-    if (b === 0x00 || b === 0xff || b < 0x20 || b > 0x7e) {
+    if (b === undefined || b === 0x00 || b === 0xff || b < 0x20 || b > 0x7e) {
       break;
     }
 
@@ -36,8 +38,12 @@ function parseName(view, offset) {
   return decoder.decode(bytes.subarray(0, end)).trim();
 }
 
-export function parseFile(view) {
-  const recipes = [];
+function flagLabel(labels: readonly string[], index: number): string {
+  return labels[index] ?? labels[labels.length - 1] ?? '';
+}
+
+export function parseFile(view: DataView): Recipe[] {
+  const recipes: Recipe[] = [];
 
   for (let page = 0; page < view.byteLength; page += PAGE_SIZE) {
     for (let slot = 0; slot < RECORDS_PER_PAGE; slot++) {
@@ -62,9 +68,9 @@ export function parseFile(view) {
       recipes.push({
         name,
         temp: tempLow + (flags & 0x80 ? 256 : 0),
-        intensity: INTENSITY[(flags >> 2) & 0b11],
-        timerStart: TIMER_START[flags & 0b11],
-        timerEnd: TIMER_END[(flags >> 5) & 0b11],
+        intensity: flagLabel(INTENSITY, (flags >> 2) & 0b11),
+        timerStart: flagLabel(TIMER_START, flags & 0b11),
+        timerEnd: flagLabel(TIMER_END, (flags >> 5) & 0b11),
         hours,
         minutes,
         seconds,

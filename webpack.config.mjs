@@ -6,11 +6,11 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default {
-  entry: './src/index.js',
+  entry: './src/index.tsx',
 
   output: {
     path: path.resolve(__dirname, 'docs'),
-    // publicPath: '/', // 'https://serg-mo.github.io/freak/',
+    // publicPath: '/', // 'https://serg-mo.github.io/recipe/',
     filename: 'bundle.js',
     clean: true,
   },
@@ -18,21 +18,12 @@ export default {
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
+        test: /\.tsx?$/,
         exclude: /node_modules/,
         use: {
-          loader: 'babel-loader',
+          loader: 'ts-loader',
           options: {
-            presets: [
-              '@babel/preset-env',
-              [
-                '@babel/preset-react',
-                {
-                  runtime: 'automatic',
-                  development: false,
-                },
-              ],
-            ],
+            transpileOnly: true,
           },
         },
       },
@@ -44,7 +35,7 @@ export default {
   },
 
   resolve: {
-    extensions: ['.js', '.jsx'],
+    extensions: ['.tsx', '.ts', '.js'],
   },
 
   plugins: [new HtmlWebpackPlugin({ template: './public/index.html' })],

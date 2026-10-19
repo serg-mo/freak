@@ -1,15 +1,21 @@
-import React, { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 
-async function loadFileContent(file) {
+async function loadFileContent(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
-    let reader = new FileReader();
-    reader.onload = (e) => resolve(e.target.result);
-    reader.onerror = (e) => reject(e);
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ''));
+    reader.onerror = () => reject(reader.error);
     reader.readAsText(file);
   });
 }
 
-function Target({ children, onClick }) {
+function Target({
+  children,
+  onClick,
+}: {
+  children: ReactNode;
+  onClick?: () => void;
+}) {
   return (
     <div className="relative z-0 w-full flex justify-center items-center select-none">
       <div
@@ -22,12 +28,16 @@ function Target({ children, onClick }) {
   );
 }
 
-// <DragAndDrop>{(txts) => console.log(txts)}</DragAndDrop>
-export default function DragAndDrop({ children }) {
-  const [context, setContext] = useState([]); // txt of each file
+type DragAndDropProps = {
+  children: (txts: string[]) => ReactNode | void;
+};
 
-  async function handleChange(event) {
-    const list = Array.from(event.target.files); // FileList to Array
+// <DragAndDrop>{(txts) => console.log(txts)}</DragAndDrop>
+export default function DragAndDrop({ children }: DragAndDropProps) {
+  const [context, setContext] = useState<string[]>([]);
+
+  async function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const list = Array.from(event.target.files ?? []);
 
     if (list.length === 0) {
       return;
@@ -36,8 +46,8 @@ export default function DragAndDrop({ children }) {
     Promise.all(list.map(loadFileContent)).then(setContext);
   }
 
-  if (Object.keys(context).length) {
-    return children(context);
+  if (context.length) {
+    return children(context) ?? null;
   }
 
   return (
